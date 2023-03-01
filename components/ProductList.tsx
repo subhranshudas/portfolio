@@ -227,15 +227,10 @@ export default function ProductList() {
                     <Text noOfLines={6}>
                         {props.overview}
                     </Text>
-
-                    <Flex alignItems="center" gap={1}>
-                        <Text as="span" fontSize="md">INR</Text>
-                        <Text color='blue.800' fontSize='2xl' fontWeight="bold">{props.price}</Text>
-                    </Flex>
                 </Stack>
             </CardBody>
             <Divider color="gray.200" />
-            <CardFooter>
+            <CardFooter justifyContent="space-between">
                 <ButtonGroup spacing='2'>
                     {props.isAlreadyAddedToCart ? (
                         <Button variant='solid' colorScheme='red' onClick={() => removeFromCart(restProps)}>
@@ -248,6 +243,11 @@ export default function ProductList() {
                     )}
                    
                 </ButtonGroup>
+
+                <Flex alignItems="center" gap={1}>
+                    <Text as="span" fontSize="md">INR</Text>
+                    <Text color='blue.800' fontSize='2xl' fontWeight="bold">{props.price}</Text>
+                </Flex>
             </CardFooter>
         </GridItem>
     )
