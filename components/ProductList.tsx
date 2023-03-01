@@ -34,6 +34,8 @@ import { BsCart3 } from 'react-icons/bs';
 import { useState, useRef } from 'react'
 import movieList from '../movieList.json'
 
+import axios from 'axios'
+
 function isMovieAlreadyAddedToCart(cartItems: any, movie: any) {
     return cartItems.some((cartItem: any) => cartItem.id === movie.id)
 }
@@ -73,6 +75,15 @@ export default function ProductList() {
         updateCart(newCartItems)
     }
 
+    const handleCheckout = async () => {
+        try {
+            await axios.post('/api/checkout_session', {
+                items: cart
+            })
+        } catch (error: any) {
+            console.log('handleCheckout: Erorr: ' ,error?.message)
+        }
+    }
 
     console.log('CART now: ', cart)
 
@@ -139,7 +150,7 @@ export default function ProductList() {
 
                                             <Stack>
                                                 <CardBody>
-                                                    <Heading size='md'>{itemInCart.title}</Heading>
+                                                    <Heading size='md'>{itemInCart.title} ({itemInCart.release_date.split('-')[0]})</Heading>
 
                                                     <Text py='2' noOfLines={8}>
                                                         {itemInCart.overview}
@@ -182,7 +193,7 @@ export default function ProductList() {
                             <Button variant='outline' mr={3} onClick={onCartClose}>
                                 Cancel
                             </Button>
-                            <Button colorScheme='blue'>Checkout</Button>
+                            <Button colorScheme='blue' onClick={() => handleCheckout()}>Checkout</Button>
                         </ButtonGroup>
                     </DrawerFooter>
                 </DrawerContent>
