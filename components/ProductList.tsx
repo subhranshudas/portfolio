@@ -31,31 +31,37 @@ import {
 
 import { BsCart3 } from 'react-icons/bs';
 
-import { useState, useRef } from 'react'
-import movieList from '../movieList.json'
+import { useState, useContext, useEffect } from 'react'
+import { UserContext } from "@portfolio/context/auth"
 
 import axios from 'axios'
+
+import { collection, getDocs } from "firebase/firestore"
+import { db } from '@portfolio/firebase';
+
+// import movieList from '../movieList.json'
+
 
 function isMovieAlreadyAddedToCart(cartItems: any, movie: any) {
     return cartItems.some((cartItem: any) => cartItem.id === movie.id)
 }
 
 export default function ProductList() {
+    const authData: any = useContext(UserContext)
+    const { isOpen: isCartOpen, onOpen: onCartOpen, onClose: onCartClose } = useDisclosure()
+
+    const [movieList, setMovieList] = useState<any>([])
+
     const [cart, updateCart] = useState<any>([])
+    const [cartCurrency, setCartCurrency] = useState('')
+
     
-    const cartCurrency = movieList[0].currency
     const cartGrandTotal = cart.map((cartItem: any) => cartItem.price).reduce((total: any, currentPrice: any) => {
         return total + currentPrice
     }, 0)
 
 
-    const { isOpen: isCartOpen, onOpen: onCartOpen, onClose: onCartClose } = useDisclosure()
-  
-
-
     const handleAddToCart = (movieSelected: any) => {
-        console.log('movieSelected: ', movieSelected)
-
         if (!isMovieAlreadyAddedToCart(cart, movieSelected)) {
             updateCart(
                 (previousCartItems: any) => {
@@ -85,7 +91,28 @@ export default function ProductList() {
         }
     }
 
-    console.log('CART now: ', cart)
+    async function getAllMovies() {
+
+        try {
+            const querySnapshot = await getDocs(collection(db, "products"));
+            const movieDocuments: any = []
+            
+            querySnapshot.forEach((doc) => {
+                const movieDoc = doc.data();
+                setCartCurrency(movieDoc.currency)
+                movieDocuments.push(movieDoc)
+            });
+
+            setMovieList(movieDocuments)
+
+        } catch (error) {
+            console.log('getAllMovies: error ')
+        }
+    }
+
+    useEffect(() => {
+        getAllMovies()
+    }, [])
 
     return (
         <>
@@ -106,6 +133,7 @@ export default function ProductList() {
                         <ProductCard
                             key={movieItem.id}
                             {...movieItem}
+                            isLoggedInUser={!!authData?.authUser}
                             handleAddToCart={handleAddToCart}
                             removeFromCart={removeFromCart}
                             isAlreadyAddedToCart={isMovieAlreadyAddedToCart(cart, movieItem)}
@@ -243,14 +271,20 @@ export default function ProductList() {
             <Divider color="gray.200" />
             <CardFooter justifyContent="space-between">
                 <ButtonGroup spacing='2'>
-                    {props.isAlreadyAddedToCart ? (
-                        <Button variant='solid' colorScheme='red' onClick={() => removeFromCart(restProps)}>
-                            Remove from cart
-                        </Button>
+                    {props.isLoggedInUser ? (
+                        props.isAlreadyAddedToCart ? (
+                            <Button variant='solid' colorScheme='red' onClick={() => removeFromCart(restProps)}>
+                                Remove from cart
+                            </Button>
+                        ) : (
+                            <Button variant='solid' colorScheme='blue' onClick={() => handleAddToCart(restProps)}>
+                                Add to cart
+                            </Button>
+                        )
                     ) : (
-                        <Button variant='solid' colorScheme='blue' onClick={() => handleAddToCart(restProps)}>
-                            Add to cart
-                     </Button>
+                        <Button variant='solid' colorScheme='blue' isDisabled>
+                            Login to Buy
+                        </Button>
                     )}
                    
                 </ButtonGroup>

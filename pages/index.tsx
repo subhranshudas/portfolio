@@ -37,7 +37,6 @@ function LandingBanner() {
   return (
     <Box
       bg="rgb(0, 0, 0)"
-      backgroundImage="/bannerBg.jpeg"
       height="100vh"
       border="1px dotted green"
       display="flex"
