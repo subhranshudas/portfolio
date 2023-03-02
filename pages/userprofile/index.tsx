@@ -1,4 +1,5 @@
 import { useEffect, useState, useContext } from 'react'
+import { useRouter } from 'next/router'
 import {
     Container,
     Flex,
@@ -20,6 +21,7 @@ import { collection, doc, setDoc, getDoc, serverTimestamp } from 'firebase/fires
 import { db } from '@portfolio/firebase'
 
 import movieList from '../../movieList.json'
+
 
 
 async function addDocumentIfNotExists(movie: any) {
@@ -52,6 +54,7 @@ async function addDocumentIfNotExists(movie: any) {
 export default function UserProfile() {
     const { authUser } = useContext<any>(UserContext)
     const isAdminUser = useIsAdmin()
+    const router = useRouter()
     const toast = useToast()
 
     const [template, setTemplate] = useState<any>(movieList[0])
@@ -86,7 +89,11 @@ export default function UserProfile() {
         }
     }
 
-    console.log('TEMPLATE: ', template)
+    useEffect(() => {
+        if (!authUser) {
+            router.replace('/')
+        }
+    }, [authUser])
     
     return (
         <Container pt="80px" maxWidth="4xl">
