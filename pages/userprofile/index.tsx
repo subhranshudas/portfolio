@@ -22,6 +22,12 @@ import { db } from '@portfolio/firebase'
 
 import movieList from '../../movieList.json'
 
+const whiteList = [
+    105, 122, 155, 207, 238, 240, 278, 311, 335, 389, 424, 637 
+]
+
+const allowedMovieList = movieList.filter((obj: any) => whiteList.includes(obj.id));
+
 
 
 async function addDocumentIfNotExists(movie: any) {
@@ -57,11 +63,11 @@ export default function UserProfile() {
     const router = useRouter()
     const toast = useToast()
 
-    const [template, setTemplate] = useState<any>(movieList[0])
+    const [template, setTemplate] = useState<any>(allowedMovieList[0])
 
     const handleSelectOnChange = (event: any) => {
         console.log('itemPicked: ', event.target.value)
-        const movieSelected = movieList.find((ms) => `${ms.id}` === event.target.value)
+        const movieSelected = allowedMovieList.find((ms) => `${ms.id}` === event.target.value)
         setTemplate(movieSelected)
     }
 
@@ -89,11 +95,13 @@ export default function UserProfile() {
         }
     }
 
+
+    // protected route ad-hoc solution
     useEffect(() => {
         if (!authUser) {
             router.replace('/')
         }
-    }, [authUser])
+    }, [router, authUser])
     
     return (
         <Container pt="80px" maxWidth="4xl">
@@ -138,11 +146,11 @@ export default function UserProfile() {
                             <Select
                                 id="template"
                                 placeholder='Select a template'
-                                defaultValue={movieList[0].id}
+                                defaultValue={allowedMovieList[0].id}
                                 onChange={handleSelectOnChange}
                                 
                             >
-                                {movieList.map((templateItem) => {
+                                {allowedMovieList.map((templateItem) => {
                                    return (
                                         <option value={templateItem.id} key={`template_keyid_${templateItem.id}`}>
                                             Movie ID: {templateItem.id}
